@@ -39,7 +39,7 @@ export default function Header() {
                 </a>
               ))}
               <a
-                href="#signup"
+                href="/auth"
                 className="text-slate-200 hover:text-cyan-300 transition-colors"
               >
                 Sign Up
