@@ -11,37 +11,44 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
+  const error = searchParams.get("error");
+  const errorDescription = searchParams.get("error_description");
 
   if (!supabaseUrl || !supabaseKey) {
     return NextResponse.redirect(`${origin}/?error=missing_supabase_env`);
+  }
+
+  const redirectTo = `${origin}${next}`;
+  const response = NextResponse.redirect(redirectTo);
+
+  if (error) {
+    const errorMessage = encodeURIComponent(
+      errorDescription ?? "OAuth sign-in failed."
+    );
+    return NextResponse.redirect(`${origin}/auth?error=${errorMessage}`);
   }
 
   if (code) {
     const cookieStore = cookies();
     const supabase = createServerClient(supabaseUrl, supabaseKey, {
       cookies: {
-        get(name) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name, value, options) {
-          try {
-            cookieStore.set({ name, value, ...options });
-          } catch {
-            // Cookies can only be set in Route Handlers or Server Actions.
-          }
-        },
-        remove(name, options) {
-          try {
-            cookieStore.set({ name, value: "", ...options });
-          } catch {
-            // Cookies can only be set in Route Handlers or Server Actions.
-          }
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
         },
       },
     });
 
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+    if (exchangeError) {
+      const errorMessage = encodeURIComponent(exchangeError.message);
+      return NextResponse.redirect(`${origin}/auth?error=${errorMessage}`);
+    }
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  return response;
 }
