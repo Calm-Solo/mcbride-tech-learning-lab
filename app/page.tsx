@@ -1,4 +1,5 @@
 import AnimatedBackground from "@/components/AnimatedBackground";
+import AuthStatus from "@/components/AuthStatus";
 import Header from "@/components/Header";
 import Section from "@/components/Section";
 import Image from "next/image";
@@ -9,6 +10,9 @@ export default function Home() {
     <main className="relative min-h-screen text-slate-100">
       <AnimatedBackground />
       <Header />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <AuthStatus />
+      </div>
 
       {/* Hero Section */}
       <Section id="hero" className="pt-24 pb-16">
