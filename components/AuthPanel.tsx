@@ -12,6 +12,12 @@ export default function AuthPanel() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const errorParam = params.get("error");
+    if (errorParam) {
+      setStatus(decodeURIComponent(errorParam));
+    }
+
     let isMounted = true;
 
     const loadSession = async () => {
@@ -73,15 +79,27 @@ export default function AuthPanel() {
     setStatus(null);
     setIsLoading(true);
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=/auth`,
+        skipBrowserRedirect: true,
       },
     });
 
+    if (error) {
+      setIsLoading(false);
+      setStatus(error.message);
+      return;
+    }
+
+    if (data?.url) {
+      window.location.assign(data.url);
+      return;
+    }
+
     setIsLoading(false);
-    setStatus(error ? error.message : null);
+    setStatus("Unable to start Google sign-in. Please try again.");
   };
 
   const handleSignOut = async () => {

@@ -48,6 +48,8 @@ export async function GET(request: Request) {
       const errorMessage = encodeURIComponent(exchangeError.message);
       return NextResponse.redirect(`${origin}/auth?error=${errorMessage}`);
     }
+  } else {
+    return NextResponse.redirect(`${origin}/auth?error=missing_code`);
   }
 
   return response;
