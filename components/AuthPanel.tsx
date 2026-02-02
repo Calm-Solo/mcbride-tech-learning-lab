@@ -79,6 +79,10 @@ export default function AuthPanel() {
     setStatus(null);
     setIsLoading(true);
 
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9d3f36e3-fb6e-4afe-9ddf-0d84878b37a3',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'components/AuthPanel.tsx:60',message:'google_sign_in_start',data:{origin:window.location.origin,path:window.location.pathname,hasStatus:Boolean(status),userAgent:navigator.userAgent},timestamp:Date.now(),sessionId:'debug-session',runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -88,16 +92,25 @@ export default function AuthPanel() {
     });
 
     if (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/9d3f36e3-fb6e-4afe-9ddf-0d84878b37a3',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'components/AuthPanel.tsx:72',message:'google_sign_in_error',data:{errorMessage:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'pre-fix',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       setIsLoading(false);
       setStatus(error.message);
       return;
     }
 
     if (data?.url) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/9d3f36e3-fb6e-4afe-9ddf-0d84878b37a3',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'components/AuthPanel.tsx:79',message:'google_sign_in_redirect',data:{hasUrl:true,urlOrigin:new URL(data.url).origin},timestamp:Date.now(),sessionId:'debug-session',runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       window.location.assign(data.url);
       return;
     }
 
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9d3f36e3-fb6e-4afe-9ddf-0d84878b37a3',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'components/AuthPanel.tsx:86',message:'google_sign_in_no_url',data:{hasUrl:false},timestamp:Date.now(),sessionId:'debug-session',runId:'pre-fix',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     setIsLoading(false);
     setStatus("Unable to start Google sign-in. Please try again.");
   };
