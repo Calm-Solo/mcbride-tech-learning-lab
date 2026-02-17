@@ -7,7 +7,6 @@ A modern, multisensory reading platform designed to help children learn to read 
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
-- **Supabase** - Authentication and database (to be integrated)
 
 ## Getting Started
 
@@ -29,30 +28,6 @@ npm run dev
 ```
 
 3. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Supabase Setup
-
-1. Create a Supabase project and copy your Project URL and publishable (anon) key.
-2. Create a local env file:
-```bash
-cp .env.example .env.local
-```
-3. Fill in:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY` for legacy)
-   - `NEXT_PUBLIC_SITE_URL` (local + production)
-4. Enable providers in Supabase Auth:
-   - **Email** for password sign-in
-   - **Google** for OAuth
-5. Google OAuth settings:
-   - In Google Cloud Console, set **Authorized redirect URIs** to your Supabase callback:
-     - `https://YOUR_PROJECT_ID.supabase.co/auth/v1/callback`
-   - In Supabase Auth settings, add redirect URLs for your app:
-     - `http://localhost:3000/auth/callback`
-     - `https://your-domain.com/auth/callback`
-   - Supabase Google provider requires your **Client ID** and **Client Secret**.
-
-Note: If you add a service role key later, keep it server-only and never expose it to the browser.
 
 ## Project Structure
 
@@ -84,7 +59,7 @@ mcbride-tech-learning-lab/
 ## Next Steps
 
 - Add logo and favicon
-- Integrate Supabase authentication
+- Add authentication and progress tracking
 - Implement game pages
 - Add progress tracking functionality
 - Set up database schema
