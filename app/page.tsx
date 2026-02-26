@@ -3,8 +3,21 @@ import Header from "@/components/Header";
 import Section from "@/components/Section";
 import Image from "next/image";
 import heroImage from "@/images/mtll-hero.png";
+import { auth } from "@clerk/nextjs/server";
+import { getSpellingBeeProgress } from "@/lib/actions/spelling-bee";
+import Link from "next/link";
 
-export default function Home() {
+function formatTimeSeconds(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+}
+
+export default async function Home() {
+  const { userId } = await auth();
+  const spellingBeeProgress = userId ? await getSpellingBeeProgress(userId) : null;
+
   return (
     <main className="relative min-h-screen text-slate-100">
       <AnimatedBackground />
@@ -108,9 +121,9 @@ export default function Home() {
             <p className="text-slate-300/90 mb-4">
               Timed spelling challenges with no hints. Test your skills across multiple difficulty levels.
             </p>
-            <a href="#" className="text-cyan-300 font-semibold hover:text-cyan-200">
+            <Link href="/games/spelling-bee" className="text-cyan-300 font-semibold hover:text-cyan-200">
               Learn more →
-            </a>
+            </Link>
           </div>
 
           {/* Future Games */}
@@ -163,24 +176,54 @@ export default function Home() {
           </p>
         </div>
         <div className="bg-white/5 border border-white/10 rounded-2xl shadow-xl p-8 max-w-4xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-4xl font-semibold text-cyan-300 mb-2">92%</div>
-              <div className="text-slate-300">Accuracy</div>
+          {userId && spellingBeeProgress ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-4xl font-semibold text-cyan-300 mb-2">
+                  {spellingBeeProgress.total_attempts > 0
+                    ? Math.round((100 * spellingBeeProgress.total_correct) / spellingBeeProgress.total_attempts) + "%"
+                    : "—"}
+                </div>
+                <div className="text-slate-300">Accuracy</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-semibold text-emerald-300 mb-2">7</div>
+                <div className="text-slate-300">Day Streak</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-semibold text-violet-300 mb-2">
+                  {formatTimeSeconds(spellingBeeProgress.total_time_seconds)}
+                </div>
+                <div className="text-slate-300">Time Spent</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-semibold text-blue-300 mb-2">{spellingBeeProgress.total_rounds}</div>
+                <div className="text-slate-300">Rounds played</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-semibold text-emerald-300 mb-2">7</div>
-              <div className="text-slate-300">Day Streak</div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-slate-300 mb-4">Sign in to track your progress.</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-slate-400">
+                <div className="text-center">
+                  <div className="text-4xl font-semibold mb-2">—</div>
+                  <div>Accuracy</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-semibold mb-2">—</div>
+                  <div>Day Streak</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-semibold mb-2">—</div>
+                  <div>Time Spent</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-semibold mb-2">—</div>
+                  <div>Rounds played</div>
+                </div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-semibold text-violet-300 mb-2">45m</div>
-              <div className="text-slate-300">Time Spent</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-semibold text-blue-300 mb-2">12</div>
-              <div className="text-slate-300">Mastery Badges</div>
-            </div>
-          </div>
+          )}
         </div>
       </Section>
 

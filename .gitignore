@@ -30,6 +30,7 @@ yarn-error.log*
 # local secrets
 supabase.md.txt
 debug.md
+SETUP_CLERK.md
 
 
 # vercel

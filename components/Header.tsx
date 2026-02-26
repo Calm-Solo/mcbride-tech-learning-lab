@@ -1,6 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import MobileMenu from "./MobileMenu";
 
 export default function Header() {
@@ -38,18 +45,28 @@ export default function Header() {
                   {link.label}
                 </a>
               ))}
-              <a
-                href="/auth"
-                className="text-slate-200 hover:text-cyan-300 transition-colors"
-              >
-                Sign Up
-              </a>
-              <a
-                href="/auth"
-                className="bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 px-4 py-2 rounded-lg font-semibold hover:from-cyan-400 hover:to-blue-400 transition-colors shadow-lg shadow-cyan-500/20"
-              >
-                Log In
-              </a>
+              <SignedOut>
+                <span className="flex items-center gap-8">
+                  <SignUpButton mode="modal">
+                    <span className="text-slate-200 hover:text-cyan-300 transition-colors cursor-pointer">
+                      Sign Up
+                    </span>
+                  </SignUpButton>
+                  <SignInButton mode="modal">
+                    <span className="bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 px-4 py-2 rounded-lg font-semibold hover:from-cyan-400 hover:to-blue-400 transition-colors shadow-lg shadow-cyan-500/20 cursor-pointer inline-block">
+                      Log In
+                    </span>
+                  </SignInButton>
+                </span>
+              </SignedOut>
+              <SignedIn>
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    variables: { colorPrimary: "#06b6d4" },
+                  }}
+                />
+              </SignedIn>
             </nav>
 
             {/* Mobile Menu Button */}

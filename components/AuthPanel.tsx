@@ -1,9 +1,19 @@
 "use client";
 
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+
 export default function AuthPanel() {
   return (
-    <p className="text-slate-300">
-      Sign in and progress tracking are coming soon. You can explore the games and features below.
-    </p>
+    <div className="text-slate-300">
+      <SignedOut>
+        <p>Sign in or sign up above to track your progress.</p>
+      </SignedOut>
+      <SignedIn>
+        <p className="flex items-center gap-2">
+          You&apos;re signed in.
+          <UserButton afterSignOutUrl="/" />
+        </p>
+      </SignedIn>
+    </div>
   );
 }

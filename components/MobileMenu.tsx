@@ -1,5 +1,8 @@
 "use client";
 
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
+
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,7 +13,6 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     { href: "#games", label: "Games" },
     { href: "#features", label: "Features" },
     { href: "#progress", label: "Progress" },
-    { href: "/auth", label: "Sign In" },
   ];
 
   if (!isOpen) return null;
@@ -61,6 +63,28 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 {link.label}
               </a>
             ))}
+            <SignedOut>
+              <Link
+                href="/sign-in"
+                onClick={onClose}
+                className="block py-4 px-4 text-lg text-slate-200 hover:bg-white/10 hover:text-cyan-300 rounded-lg transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/sign-up"
+                onClick={onClose}
+                className="block py-4 px-4 text-lg text-slate-200 hover:bg-white/10 hover:text-cyan-300 rounded-lg transition-colors"
+              >
+                Sign Up
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <div className="flex items-center gap-3 py-4 px-4">
+                <span className="text-lg text-slate-200">Account</span>
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </SignedIn>
           </nav>
         </div>
       </div>
