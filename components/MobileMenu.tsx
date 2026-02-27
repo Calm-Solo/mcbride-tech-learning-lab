@@ -65,14 +65,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             ))}
             <SignedOut>
               <Link
-                href="/sign-in"
+                href="/auth"
                 onClick={onClose}
                 className="block py-4 px-4 text-lg text-slate-200 hover:bg-white/10 hover:text-cyan-300 rounded-lg transition-colors"
               >
                 Sign In
               </Link>
               <Link
-                href="/sign-up"
+                href="/auth?tab=signup"
                 onClick={onClose}
                 className="block py-4 px-4 text-lg text-slate-200 hover:bg-white/10 hover:text-cyan-300 rounded-lg transition-colors"
               >

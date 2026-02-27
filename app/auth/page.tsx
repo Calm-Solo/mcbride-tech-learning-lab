@@ -1,7 +1,7 @@
 "use client";
 
 import { SignIn, SignUp, useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Section from "@/components/Section";
@@ -11,7 +11,11 @@ type Tab = "signin" | "signup";
 export default function AuthPage() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("signin");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [tab, setTab] = useState<Tab>(
+    tabParam === "signup" ? "signup" : "signin"
+  );
 
   useEffect(() => {
     if (isSignedIn) {
