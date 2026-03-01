@@ -8,11 +8,12 @@ This file tracks the scope and current state of the project so AI agents can sta
 
 **McBride Tech Learning Lab** is a multisensory learning platform that helps children build reading skills through:
 
-- Engaging games (Word Builder, Letter Match, Spelling Bee, Story Mode, Sentence Builder)
-- Immediate feedback and progress tracking
-- Accessibility-focused design (dyslexia-friendly fonts, audio feedback, high contrast, mobile-first)
+- **Spelling Bee Training Mode** – YouTube videos (M.T-5 teaches how to spell); links are configurable in code; no DB tracking.
+- **Spelling Bee Mode** – The only game: timed spelling by skill level (Easy, Medium, Hard, Parent Mode). No hints; the word is not shown—players spell from audio only. Optional word prompts and per-question/round-end sounds in `public/sounds/` (see docs/AUDIO.md).
+- Immediate feedback and progress tracking for Spelling Bee; progress is stored per user (Neon) and shown on the home page.
+- Accessibility-focused design (dyslexia-friendly fonts, audio feedback, high contrast, mobile-first).
 
-Target: learners sign in to track progress; progress is stored per user and shown on the home page.
+Word lists, MP3 audio files, and YouTube video links are provided by you and configured in the repo (see lib/words/spelling-bee.ts, lib/training-videos.ts, and docs/AUDIO.md).
 
 ---
 
@@ -32,7 +33,7 @@ Target: learners sign in to track progress; progress is stored per user and show
 - **middleware.ts** – `clerkMiddleware()` with explicit `publishableKey` and `secretKey` from env. Requires `CLERK_ENCRYPTION_KEY` when using dynamic keys (generate with `openssl rand -hex 32`).
 - **app/layout.tsx** – `ClerkProvider` with `publishableKey` from env.
 - **components/Header.tsx** – SignedOut: SignInButton, SignUpButton (modal); SignedIn: UserButton.
-- **components/MobileMenu.tsx** – Sign In / Sign Up links to Clerk routes; SignedIn: UserButton.
+- **components/MobileMenu.tsx** – Sign In / Sign Up link to `/auth` (and `/auth?tab=signup`); SignedIn: UserButton.
 - **app/auth/page.tsx** – Dedicated `/auth` with tabbed SignIn/SignUp; redirects signed-in users to `/`.
 
 ### Database and progress (Neon)
@@ -43,14 +44,18 @@ Target: learners sign in to track progress; progress is stored per user and show
 
 ### Home page (app/page.tsx)
 
-- Hero, games grid (Word Builder, Letter Match, Spelling Bee, Story Mode, Sentence Builder), progress section, features section, footer.
+- Hero, games section with two cards: **Spelling Bee Training Mode** (link to `/training`) and **Spelling Bee Mode** (link to `/games/spelling-bee`). Progress section, features section, footer.
 - **Progress section:** If signed in, shows real Spelling Bee stats from Neon (accuracy, day streak placeholder, time spent, rounds played). If signed out, shows “Sign in to track your progress” and placeholders.
-- Spelling Bee card links to `/games/spelling-bee`.
+
+### Spelling Bee Training Mode (YouTube)
+
+- **app/training/page.tsx** – Lists YouTube videos from **lib/training-videos.ts** (title + link; opens in new tab). No DB tracking. Add or edit entries in that file.
 
 ### Spelling Bee game
 
 - **app/games/spelling-bee/page.tsx** – Game page with Header and Section.
-- **components/SpellingBeeGame.tsx** – Client component: fixed word list, one word at a time, input and submit; on round end calls `saveSpellingBeeProgress`, then shows “Round complete” and links to play again / view progress.
+- **components/SpellingBeeGame.tsx** – Client component: level selection (Easy, Medium, Hard, Parent Mode), then per-level word list and per-word timer (Parent Mode = no timer). Word is not displayed—player hears prompt from `public/sounds/{word}.mp3` and “Play again” replays it. Bold, urgent timer (color + pulse when low). Per-question feedback: `perfect.mp3` (correct) and `failure.mp3` (wrong or timeout); advance happens only after the sound ends. Round end: `success.mp3` or `failure.mp3`. Saves via `saveSpellingBeeProgress`; “Round complete” with links to play again / view progress.
+- **lib/words/spelling-bee.ts** – Word lists per level (`WORDS_BY_LEVEL`) and level config (seconds per word; Parent = no timer). Edit word arrays here.
 
 ### Other UI
 
@@ -82,10 +87,14 @@ Required for full functionality (document in SETUP_CLERK.md and/or README; never
 | **app/page.tsx** | Home; async server component; auth() + getSpellingBeeProgress; Progress section and Spelling Bee link. |
 | **app/auth/page.tsx** | Clerk SignIn/SignUp tabs; redirect when signed in. |
 | **app/games/spelling-bee/page.tsx** | Spelling Bee game wrapper. |
+| **app/training/page.tsx** | Spelling Bee Training Mode; lists videos from lib/training-videos.ts. |
+| **lib/training-videos.ts** | YouTube video list (title, url); edit to add links. |
+| **lib/words/spelling-bee.ts** | Word lists per level and timer config; edit word arrays here. |
 | **lib/db.ts** | Neon client only; server-side only. |
 | **lib/actions/spelling-bee.ts** | Server Actions for Spelling Bee progress; auth() and parameterized sql. |
-| **components/SpellingBeeGame.tsx** | Client component; calls saveSpellingBeeProgress. |
+| **components/SpellingBeeGame.tsx** | Client component; level select, timer, optional MP3, saveSpellingBeeProgress. |
 | **scripts/migrations/001_spelling_bee_progress.sql** | DDL for spelling_bee_progress; run once in Neon. |
+| **docs/AUDIO.md** | Spelling Bee audio: word prompts in `public/sounds/`, per-question (perfect.mp3, failure.mp3), round-end (success.mp3, failure.mp3). |
 
 ---
 
@@ -100,8 +109,8 @@ Required for full functionality (document in SETUP_CLERK.md and/or README; never
 ## Future scope (not yet implemented)
 
 - **Clerk production:** Switch to production keys and add production domain in Clerk Dashboard when going live.
-- **Other games:** Word Builder, Letter Match, Story Mode, Sentence Builder are UI-only (cards or “Coming soon”).
-- **Progress for other games:** Schema and actions only exist for Spelling Bee; extend pattern for other games as needed.
+- **Word Builder, Letter Match, Sentence Builder:** Removed from the app; only Spelling Bee (game) and Spelling Bee Training Mode (videos) remain.
+- **Progress for other games:** Schema and actions only exist for Spelling Bee; extend pattern if more games are added later.
 - **Day streak / mastery badges:** Progress section shows placeholders; logic not implemented.
 - **Protected routes:** Optional; use auth().protect() or clerkMiddleware() + createRouteMatcher if needed.
 

@@ -68,45 +68,28 @@ export default async function Home() {
       <Section id="games" className="bg-white/5 border-y border-white/10">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-display font-semibold text-white mb-4">
-            Games that build real reading skills
+            Spelling Bee: train, then test
           </h2>
           <p className="text-lg text-slate-300">
-            Interactive, engaging games designed to make learning fun
+            Watch M.T-5 training videos, then practice in timed Spelling Bee Mode.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Word Builder */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Spelling Bee Training Mode */}
           <div className="relative group overflow-hidden bg-white/5 border border-white/10 rounded-xl shadow-lg p-6 ring-1 ring-white/5 hover:border-cyan-400/50 hover:shadow-cyan-500/20 hover:ring-cyan-400/40 transition-all">
             <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.12),transparent)] bg-[length:200%_200%] animate-gradient" />
-            <div className="w-16 h-16 bg-cyan-400/15 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-3xl">🔤</span>
+            <div className="w-16 h-16 bg-purple-400/15 rounded-lg flex items-center justify-center mb-4">
+              <span className="text-3xl">📚</span>
             </div>
-            <h3 className="text-xl font-display font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-violet-200 mb-2 tracking-tight drop-shadow-[0_0_12px_rgba(56,189,248,0.35)]">
-              Word Builder
+            <h3 className="text-xl font-display font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-cyan-200 mb-2 tracking-tight drop-shadow-[0_0_12px_rgba(139,92,246,0.35)]">
+              Spelling Bee Training Mode
             </h3>
             <p className="text-slate-300/90 mb-4">
-              Build words by placing letters in the correct order. Perfect for learning phonics and spelling patterns.
+              Watch M.T-5 teach how to spell with videos, then open the app and test what you retained in Spelling Bee Mode.
             </p>
-            <a href="#" className="text-cyan-300 font-semibold hover:text-cyan-200">
-              Learn more →
-            </a>
-          </div>
-
-          {/* Letter Match */}
-          <div className="relative group overflow-hidden bg-white/5 border border-white/10 rounded-xl shadow-lg p-6 ring-1 ring-white/5 hover:border-cyan-400/50 hover:shadow-cyan-500/20 hover:ring-cyan-400/40 transition-all">
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.12),transparent)] bg-[length:200%_200%] animate-gradient" />
-            <div className="w-16 h-16 bg-blue-400/15 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-3xl">🎯</span>
-            </div>
-            <h3 className="text-xl font-display font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-blue-200 mb-2 tracking-tight drop-shadow-[0_0_12px_rgba(56,189,248,0.35)]">
-              Letter Match
-            </h3>
-            <p className="text-slate-300/90 mb-4">
-              Match sounds to letters and build your phonics foundation. Great for early readers.
-            </p>
-            <a href="#" className="text-cyan-300 font-semibold hover:text-cyan-200">
-              Learn more →
-            </a>
+            <Link href="/training" className="text-cyan-300 font-semibold hover:text-cyan-200">
+              Watch videos →
+            </Link>
           </div>
 
           {/* Spelling Bee Mode */}
@@ -119,49 +102,20 @@ export default async function Home() {
               Spelling Bee Mode
             </h3>
             <p className="text-slate-300/90 mb-4">
-              Timed spelling challenges with no hints. Test your skills across multiple difficulty levels.
+              Timed spelling challenges with no hints. Easy, Medium, Hard, and Parent Mode.
             </p>
             <Link href="/games/spelling-bee" className="text-cyan-300 font-semibold hover:text-cyan-200">
-              Learn more →
+              Play now →
             </Link>
-          </div>
-
-          {/* Future Games */}
-          <div className="relative group overflow-hidden bg-white/5 border border-white/10 rounded-xl shadow-lg p-6 opacity-75 ring-1 ring-white/5 hover:ring-cyan-400/40 transition-all">
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.12),transparent)] bg-[length:200%_200%] animate-gradient" />
-            <div className="w-16 h-16 bg-purple-400/15 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-3xl">📚</span>
-            </div>
-            <h3 className="text-xl font-display font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-cyan-200 mb-2 tracking-tight drop-shadow-[0_0_12px_rgba(139,92,246,0.35)]">
-              Story Mode
-            </h3>
-            <p className="text-slate-300/90 mb-4">
-              Coming soon: Interactive stories that adapt to your reading level.
-            </p>
-            <span className="text-slate-400 font-semibold">Coming Soon</span>
-          </div>
-
-          <div className="relative group overflow-hidden bg-white/5 border border-white/10 rounded-xl shadow-lg p-6 opacity-75 ring-1 ring-white/5 hover:ring-cyan-400/40 transition-all">
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.12),transparent)] bg-[length:200%_200%] animate-gradient" />
-            <div className="w-16 h-16 bg-pink-400/15 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-3xl">📝</span>
-            </div>
-            <h3 className="text-xl font-display font-semibold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-white to-violet-200 mb-2 tracking-tight drop-shadow-[0_0_12px_rgba(236,72,153,0.35)]">
-              Sentence Builder
-            </h3>
-            <p className="text-slate-300/90 mb-4">
-              Coming soon: Build sentences and learn grammar through interactive play.
-            </p>
-            <span className="text-slate-400 font-semibold">Coming Soon</span>
           </div>
         </div>
         <div className="text-center mt-12">
-          <a
-            href="#games"
+          <Link
+            href="/training"
             className="inline-block bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 px-8 py-3 rounded-lg font-semibold hover:from-cyan-400 hover:to-blue-400 transition-colors shadow-lg shadow-cyan-500/30"
           >
-            Explore all games
-          </a>
+            Start training
+          </Link>
         </div>
       </Section>
 
