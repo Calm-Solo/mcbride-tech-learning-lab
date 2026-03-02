@@ -28,7 +28,7 @@ export default function Header() {
             <div className="flex-shrink-0">
               <a
                 href="/"
-                className="text-xl sm:text-2xl font-display font-semibold bg-gradient-to-r from-cyan-300 via-blue-200 to-violet-300 bg-clip-text text-transparent"
+                className="text-xl sm:text-2xl font-display font-bold tracking-tight bg-gradient-to-r from-cyan-300 via-blue-200 to-violet-300 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:drop-shadow-[0_0_28px_rgba(34,211,238,0.55)] transition-all duration-300"
               >
                 McBride Tech Learning Lab
               </a>
