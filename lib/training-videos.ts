@@ -8,6 +8,16 @@ export type TrainingVideo = {
 };
 
 export const TRAINING_VIDEOS: TrainingVideo[] = [
-  { title: "Introduction & How To Spell CAT", url: "https://youtube.com/shorts/DlCZrLgBEhQ?feature=shared" },
-  { title: "ROAD TRIP SONG", url: "https://youtube.com/shorts/lZwVfeJnA_Y?feature=shared" },
+  {
+    title: "Introduction & How To Spell CAT",
+    url: "https://youtube.com/shorts/DlCZrLgBEhQ?feature=shared",
+  },
+  {
+    title: "ROAD TRIP SONG",
+    url: "https://youtube.com/shorts/lZwVfeJnA_Y?feature=shared",
+  },
+  {
+    title: "Episode 2",
+    url: "https://youtube.com/shorts/8j2oovq1Olw?si=vZFBYQoxHVmlLXXs",
+  },
 ];
