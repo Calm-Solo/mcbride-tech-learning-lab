@@ -20,7 +20,13 @@ export const LEVEL_CONFIG: Record<
 // - HARD_WORDS: reserved for future hardest words (empty for now)
 const EASY_WORDS = ["cat", "dog", "run", "sun", "hat"];
 const MEDIUM_WORDS = ["school", "learn", "computer", "hospital", "education"];
-const HARD_WORDS: string[] = [];
+const HARD_WORDS = [
+  "california",
+  "cincinatti",
+  "mississippi",
+  "pennsylvania",
+  "philadelphia",
+];
 
 const PARENT_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
 

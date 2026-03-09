@@ -31,7 +31,8 @@ yarn-error.log*
 supabase.md.txt
 debug.md
 SETUP_CLERK.md
-
+progress.md
+updates.md
 
 # vercel
 .vercel
@@ -39,3 +40,4 @@ SETUP_CLERK.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+progress.md

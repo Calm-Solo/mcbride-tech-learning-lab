@@ -44,7 +44,8 @@ Word lists, MP3 audio files, and YouTube video links are provided by you and con
 
 ### Home page (app/page.tsx)
 
-- Hero, games section with two cards: **Spelling Bee Training Mode** (link to `/training`) and **Spelling Bee Mode** (link to `/games/spelling-bee`). Progress section, features section, footer.
+- Hero with CTA buttons: **Start Free**, **See Games**, and an **Instructions** button that plays `welcome.mp3` so non-readers can hear spoken guidance.
+- Games section with two large, tappable image tiles (`images/training-vids.png`, `images/play-now.png`) that link to **Spelling Bee Training Mode** (`/training`) and **Spelling Bee Mode** (`/games/spelling-bee`).
 - **Progress section:** If signed in, shows real Spelling Bee stats from Neon (accuracy, day streak placeholder, time spent, rounds played). If signed out, shows “Sign in to track your progress” and placeholders.
 
 ### Spelling Bee Training Mode (YouTube)
@@ -54,8 +55,12 @@ Word lists, MP3 audio files, and YouTube video links are provided by you and con
 ### Spelling Bee game
 
 - **app/games/spelling-bee/page.tsx** – Game page with Header and Section.
-- **components/SpellingBeeGame.tsx** – Client component: level selection (Easy, Medium, Hard, Parent Mode), then per-level word list and per-word timer (Parent Mode = no timer). Word is not displayed—player hears prompt from `public/sounds/{word}.mp3` and “Play again” replays it. Bold, urgent timer (color + pulse when low). Per-question feedback: `perfect.mp3` (correct) and `failure.mp3` (wrong or timeout); advance happens only after the sound ends. Round end: `success.mp3` or `failure.mp3`. Saves via `saveSpellingBeeProgress`; “Round complete” with links to play again / view progress.
-- **lib/words/spelling-bee.ts** – Word lists per level (`WORDS_BY_LEVEL`) and level config (seconds per word; Parent = no timer). Edit word arrays here.
+- **components/SpellingBeeGame.tsx** – Client component: level selection (Easy, Medium, Hard, Parent Mode), then per-level word list and per-word timer (Parent Mode = no timer). Word is not displayed—player hears prompt from `public/sounds/{word}.mp3` and “Play again” replays it. Bold, urgent timer (color + pulse when low). Per-question feedback: `perfect.mp3` (correct) and `failure.mp3` (wrong or timeout); advance happens only after the sound ends. Round end: `success.mp3` or `failure.mp3`. Saves via `saveSpellingBeeProgress`; “Round complete” with links to play again / view progress. The game logic has been refactored to avoid stale state and double-advance bugs (see `debug.md` for details).
+- **lib/words/spelling-bee.ts** – Word lists per level (`WORDS_BY_LEVEL`) and level config (seconds per word; Parent = no timer). Uses a **separated tier** model:
+  - Easy: `EASY_WORDS` – short 3-letter starter words (e.g. `cat`, `dog`, `run`, `sun`, `hat`), 30s/word.
+  - Medium: `MEDIUM_WORDS` – current longer words with MP3s (`school`, `learn`, `computer`, `hospital`, `education`), 20s/word.
+  - Hard: `HARD_WORDS` – reserved for the most difficult future words (currently empty), 12s/word.
+  - Parent Mode: `PARENT_WORDS` – union of Easy + Medium + Hard with no timer.
 
 ### Other UI
 
