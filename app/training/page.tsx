@@ -2,11 +2,18 @@ import Header from "@/components/Header";
 import Section from "@/components/Section";
 import Link from "next/link";
 import { TRAINING_VIDEOS } from "@/lib/training-videos";
+import dynamic from "next/dynamic";
+
+const TrainingIntroAudio = dynamic(
+  () => import("@/components/TrainingIntroAudio"),
+  { ssr: false },
+);
 
 export default function TrainingPage() {
   return (
     <main className="relative min-h-screen text-slate-100">
       <Header />
+      <TrainingIntroAudio />
       <Section className="pt-24 pb-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-display font-semibold text-white mb-2">

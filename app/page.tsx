@@ -3,9 +3,17 @@ import Header from "@/components/Header";
 import Section from "@/components/Section";
 import Image from "next/image";
 import heroImage from "@/images/mtll-hero.png";
+import playNowImage from "@/images/play-now.png";
+import trainingVidsImage from "@/images/training-vids.png";
 import { auth } from "@clerk/nextjs/server";
 import { getSpellingBeeProgress } from "@/lib/actions/spelling-bee";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import InstructionsButton from "@/components/InstructionsButton";
+
+const WelcomeAudio = dynamic(() => import("@/components/WelcomeAudio"), {
+  ssr: false,
+});
 
 function formatTimeSeconds(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
@@ -20,6 +28,7 @@ export default async function Home() {
 
   return (
     <main className="relative min-h-screen text-slate-100">
+      <WelcomeAudio />
       <AnimatedBackground />
       <Header />
 
@@ -46,6 +55,7 @@ export default async function Home() {
             >
               See Games
             </a>
+            <InstructionsButton />
           </div>
           <div className="mt-12">
             <div className="bg-white/5 border border-white/10 backdrop-blur rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl mx-auto">
@@ -66,55 +76,45 @@ export default async function Home() {
 
       {/* Games Overview */}
       <Section id="games" className="bg-white/5 border-y border-white/10">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-display font-semibold text-white mb-4">
-            Spelling Bee: train, then test
+        <div className="text-center mb-10">
+          <h2 className="text-4xl font-display font-semibold text-white mb-2">
+            Spelling Bee
           </h2>
-          <p className="text-lg text-slate-300">
-            Watch M.T-5 training videos, then practice in timed Spelling Bee Mode.
+          <p className="text-sm text-slate-400 max-w-md mx-auto">
+            Tap a picture to start.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Spelling Bee Training Mode */}
-          <div className="relative group overflow-hidden bg-white/5 border border-white/10 rounded-xl shadow-lg p-6 ring-1 ring-white/5 hover:border-cyan-400/50 hover:shadow-cyan-500/20 hover:ring-cyan-400/40 transition-all">
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.12),transparent)] bg-[length:200%_200%] animate-gradient" />
-            <div className="w-16 h-16 bg-purple-400/15 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-3xl">📚</span>
-            </div>
-            <h3 className="text-xl font-display font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-cyan-200 mb-2 tracking-tight drop-shadow-[0_0_12px_rgba(139,92,246,0.35)]">
-              Spelling Bee Training Mode
-            </h3>
-            <p className="text-slate-300/90 mb-4">
-              Watch M.T-5 teach how to spell with videos, then open the app and test what you retained in Spelling Bee Mode.
-            </p>
-            <Link href="/training" className="text-cyan-300 font-semibold hover:text-cyan-200">
-              Watch videos →
-            </Link>
-          </div>
-
-          {/* Spelling Bee Mode */}
-          <div className="relative group overflow-hidden bg-white/5 border border-white/10 rounded-xl shadow-lg p-6 ring-1 ring-white/5 hover:border-cyan-400/50 hover:shadow-cyan-500/20 hover:ring-cyan-400/40 transition-all">
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.12),transparent)] bg-[length:200%_200%] animate-gradient" />
-            <div className="w-16 h-16 bg-violet-400/15 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-3xl">🐝</span>
-            </div>
-            <h3 className="text-xl font-display font-semibold text-transparent bg-clip-text bg-gradient-to-r from-violet-200 via-white to-cyan-200 mb-2 tracking-tight drop-shadow-[0_0_12px_rgba(139,92,246,0.35)]">
-              Spelling Bee Mode
-            </h3>
-            <p className="text-slate-300/90 mb-4">
-              Timed spelling challenges with no hints. Easy, Medium, Hard, and Parent Mode.
-            </p>
-            <Link href="/games/spelling-bee" className="text-cyan-300 font-semibold hover:text-cyan-200">
-              Play now →
-            </Link>
-          </div>
-        </div>
-        <div className="text-center mt-12">
           <Link
             href="/training"
-            className="inline-block bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 px-8 py-3 rounded-lg font-semibold hover:from-cyan-400 hover:to-blue-400 transition-colors shadow-lg shadow-cyan-500/30"
+            aria-label="Watch spelling training videos"
+            className="group relative overflow-hidden bg-white/5 border border-white/10 rounded-2xl shadow-lg ring-1 ring-white/5 hover:border-cyan-400/70 hover:ring-cyan-400/50 transition-all"
           >
-            Start training
+            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.16),transparent)] bg-[length:200%_200%] animate-gradient" />
+            <Image
+              src={trainingVidsImage}
+              alt="Training videos"
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="block w-full h-auto group-hover:scale-[1.02] transition-transform duration-300"
+              priority={false}
+            />
+          </Link>
+
+          {/* Spelling Bee Mode */}
+          <Link
+            href="/games/spelling-bee"
+            aria-label="Play spelling bee game"
+            className="group relative overflow-hidden bg-white/5 border border-white/10 rounded-2xl shadow-lg ring-1 ring-white/5 hover:border-cyan-400/70 hover:ring-cyan-400/50 transition-all"
+          >
+            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.16),transparent)] bg-[length:200%_200%] animate-gradient" />
+            <Image
+              src={playNowImage}
+              alt="Play now"
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="block w-full h-auto group-hover:scale-[1.02] transition-transform duration-300"
+              priority={false}
+            />
           </Link>
         </div>
       </Section>

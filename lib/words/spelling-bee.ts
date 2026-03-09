@@ -14,13 +14,21 @@ export const LEVEL_CONFIG: Record<
   parent: { label: "Parent Mode", secondsPerWord: null },
 };
 
-const DEFAULT_WORDS = ["cat", "dog", "run", "sun", "hat"];
+// Separated tiers:
+// - EASY_WORDS: 3-letter starter words
+// - MEDIUM_WORDS: current longer words (new MP3 set)
+// - HARD_WORDS: reserved for future hardest words (empty for now)
+const EASY_WORDS = ["cat", "dog", "run", "sun", "hat"];
+const MEDIUM_WORDS = ["school", "learn", "computer", "hospital", "education"];
+const HARD_WORDS: string[] = [];
+
+const PARENT_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
 
 export const WORDS_BY_LEVEL: Record<SpellingBeeLevel, string[]> = {
-  easy: [...DEFAULT_WORDS],
-  medium: [...DEFAULT_WORDS],
-  hard: [...DEFAULT_WORDS],
-  parent: [...DEFAULT_WORDS],
+  easy: [...EASY_WORDS],
+  medium: [...MEDIUM_WORDS],
+  hard: [...HARD_WORDS],
+  parent: [...PARENT_WORDS],
 };
 
 export function getWordsForLevel(level: SpellingBeeLevel): string[] {
