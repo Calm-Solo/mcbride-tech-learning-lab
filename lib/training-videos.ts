@@ -20,4 +20,8 @@ export const TRAINING_VIDEOS: TrainingVideo[] = [
     title: "Episode 2",
     url: "https://youtube.com/shorts/8j2oovq1Olw?si=vZFBYQoxHVmlLXXs",
   },
+  {
+    title: "Episode 3",
+    url: "https://youtube.com/shorts/Urm2JE8f3DA?si=ZtwUdiVfNwMsnXP5",
+  },
 ];
