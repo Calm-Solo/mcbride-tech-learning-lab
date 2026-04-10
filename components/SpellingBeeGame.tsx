@@ -8,7 +8,15 @@ import {
   getWordsForLevel,
   getSecondsPerWord,
   LEVEL_CONFIG,
+  ROUND_SIZE,
 } from "@/lib/words/spelling-bee";
+
+function shuffleInPlace<T>(items: T[]): void {
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+}
 
 export default function SpellingBeeGame() {
   const [level, setLevel] = useState<SpellingBeeLevel | null>(null);
@@ -108,7 +116,10 @@ export default function SpellingBeeGame() {
     advancingRef.current = false;
     timeoutHandledRef.current = false;
     setLevel(selectedLevel);
-    setWords(getWordsForLevel(selectedLevel));
+    const pool = getWordsForLevel(selectedLevel);
+    shuffleInPlace(pool);
+    const n = Math.min(ROUND_SIZE[selectedLevel], pool.length);
+    setWords(pool.slice(0, n));
     setSecondsPerWord(getSecondsPerWord(selectedLevel));
     setStartTime(Date.now());
     setIndex(0);

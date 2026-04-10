@@ -14,6 +14,14 @@ export const LEVEL_CONFIG: Record<
   parent: { label: "Parent Mode", secondsPerWord: null },
 };
 
+/** Words per round after shuffle (capped by list length). Adjust per level as lists grow. */
+export const ROUND_SIZE: Record<SpellingBeeLevel, number> = {
+  easy: 5,
+  medium: 5,
+  hard: 5,
+  parent: 10,
+};
+
 // Separated tiers:
 // - EASY_WORDS: 3-letter starter words
 // - MEDIUM_WORDS: current longer words (new MP3 set)
