@@ -17,6 +17,7 @@ export default function Header() {
     { href: "#games", label: "Games" },
     { href: "#features", label: "Features" },
     { href: "#progress", label: "Progress" },
+    { href: "/leaderboard", label: "Leaderboard" },
   ];
 
   return (

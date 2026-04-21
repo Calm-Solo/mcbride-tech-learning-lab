@@ -11,6 +11,7 @@ This file tracks the scope and current state of the project so AI agents can sta
 - **Spelling Bee Training Mode** – YouTube videos (M.T-5 teaches how to spell); links are configurable in code; no DB tracking.
 - **Spelling Bee Mode** – The only game: timed spelling by skill level (Easy, Medium, Hard, Parent Mode). No hints; the word is not shown—players spell from audio only. Optional word prompts and per-question/round-end sounds in `public/sounds/` (see docs/AUDIO.md).
 - Immediate feedback and progress tracking for Spelling Bee; progress is stored per user (Neon) and shown on the home page.
+- **Weekly leaderboard (Spelling Bee)** – Top players for the current calendar week (Pacific: `America/Los_Angeles`) on `/leaderboard`; display names are stored at save time so leaderboard reads do not call Clerk’s backend user API.
 - Accessibility-focused design (dyslexia-friendly fonts, audio feedback, high contrast, mobile-first).
 
 Word lists, MP3 audio files, and YouTube video links are provided by you and configured in the repo (see lib/words/spelling-bee.ts, lib/training-videos.ts, and docs/AUDIO.md).
@@ -32,15 +33,16 @@ Word lists, MP3 audio files, and YouTube video links are provided by you and con
 
 - **middleware.ts** – `clerkMiddleware()` with explicit `publishableKey` and `secretKey` from env. Requires `CLERK_ENCRYPTION_KEY` when using dynamic keys (generate with `openssl rand -hex 32`).
 - **app/layout.tsx** – `ClerkProvider` with `publishableKey` from env.
-- **components/Header.tsx** – SignedOut: SignInButton, SignUpButton (modal); SignedIn: UserButton.
-- **components/MobileMenu.tsx** – Sign In / Sign Up link to `/auth` (and `/auth?tab=signup`); SignedIn: UserButton.
+- **components/Header.tsx** – SignedOut: SignInButton, SignUpButton (modal); SignedIn: UserButton. Nav includes **Leaderboard** → `/leaderboard` (page redirects signed-out users to `/auth`).
+- **components/MobileMenu.tsx** – Sign In / Sign Up link to `/auth` (and `/auth?tab=signup`); SignedIn: UserButton. Nav includes **Leaderboard** → `/leaderboard`.
 - **app/auth/page.tsx** – Dedicated `/auth` with tabbed SignIn/SignUp; redirects signed-in users to `/`.
 
 ### Database and progress (Neon)
 
 - **lib/db.ts** – Single Neon client export `sql`; validates `DATABASE_URL` (must be `postgresql://` or `postgres://`). Server-side only.
 - **scripts/migrations/001_spelling_bee_progress.sql** – Table `spelling_bee_progress` (clerk_user_id, total_rounds, total_correct, total_attempts, total_time_seconds, last_played_at). Run once in Neon SQL Editor.
-- **lib/actions/spelling-bee.ts** – Server Actions: `getSpellingBeeProgress(clerkUserId)`, `saveSpellingBeeProgress({ correct, total, timeSeconds })`. Uses `auth()` for userId; parameterized queries only.
+- **scripts/migrations/002_leaderboard.sql** – Adds optional `display_name` on `spelling_bee_progress` and creates `spelling_bee_weekly` (one row per user per week): `week_start` (Monday in Pacific time), `display_name`, `total_correct`, `total_attempts`. Week boundary in SQL matches `DATE_TRUNC('week', (NOW() AT TIME ZONE 'America/Los_Angeles'))::DATE`. Run once in Neon SQL Editor after `001_spelling_bee_progress.sql`.
+- **lib/actions/spelling-bee.ts** – Server Actions: `getSpellingBeeProgress(clerkUserId)`, `saveSpellingBeeProgress({ correct, total, timeSeconds, displayName? })`, `getWeeklyLeaderboard()`. Saving still upserts cumulative `spelling_bee_progress` as before; when `displayName` is present on the input (including `null`), it also upserts into `spelling_bee_weekly` for the current Pacific week, adding correct/attempts on conflict. `getWeeklyLeaderboard()` returns the top 10 rows for the current week ordered by a combined score (accuracy × volume). Uses `auth()` on save; parameterized queries only.
 
 ### Home page (app/page.tsx)
 
@@ -55,12 +57,17 @@ Word lists, MP3 audio files, and YouTube video links are provided by you and con
 ### Spelling Bee game
 
 - **app/games/spelling-bee/page.tsx** – Game page with Header and Section.
-- **components/SpellingBeeGame.tsx** – Client component: level selection (Easy, Medium, Hard, Parent Mode), then per-level word list and per-word timer (Parent Mode = no timer). Word is not displayed—player hears prompt from `public/sounds/{word}.mp3` and “Play again” replays it. Bold, urgent timer (color + pulse when low). Per-question feedback: `perfect.mp3` (correct) and `failure.mp3` (wrong or timeout); advance happens only after the sound ends. Round end: `success.mp3` or `failure.mp3`. Saves via `saveSpellingBeeProgress`; “Round complete” with links to play again / view progress. The game logic has been refactored to avoid stale state and double-advance bugs (see `debug.md` for details).
+- **components/SpellingBeeGame.tsx** – Client component: level selection (Easy, Medium, Hard, Parent Mode), then per-level word list and per-word timer (Parent Mode = no timer). Word is not displayed—player hears prompt from `public/sounds/{word}.mp3` and “Play again” replays it. Bold, urgent timer (color + pulse when low). Per-question feedback: `perfect.mp3` (correct) and `failure.mp3` (wrong or timeout); advance happens only after the sound ends. Round end: `success.mp3` or `failure.mp3`. Saves via `saveSpellingBeeProgress` with optional `displayName` from Clerk `useUser()` (`firstName` or `username`); “Round complete” with links to play again / view progress. The game logic has been refactored to avoid stale state and double-advance bugs (see `debug.md` for details).
 - **lib/words/spelling-bee.ts** – Word lists per level (`WORDS_BY_LEVEL`) and level config (seconds per word; Parent = no timer). Uses a **separated tier** model:
   - Easy: `EASY_WORDS` – short 3-letter starter words (e.g. `cat`, `dog`, `run`, `sun`, `hat`), 30s/word.
   - Medium: `MEDIUM_WORDS` – current longer words with MP3s (`school`, `learn`, `computer`, `hospital`, `education`), 20s/word.
   - Hard: `HARD_WORDS` – reserved for the most difficult future words (currently empty), 12s/word.
   - Parent Mode: `PARENT_WORDS` – union of Easy + Medium + Hard with no timer.
+
+### Weekly leaderboard (Spelling Bee)
+
+- **app/leaderboard/page.tsx** – Async Server Component: `auth()` from `@clerk/nextjs/server`; redirects signed-out users to `/auth`. Loads rows via `getWeeklyLeaderboard()` and passes them to `Leaderboard`. Subtitle shows the current week’s Monday–Sunday range in Pacific time; the week start is read from Neon with the same `DATE_TRUNC` / `America/Los_Angeles` expression as the leaderboard query so UI and DB stay aligned.
+- **components/Leaderboard.tsx** – Client component: ranked list (up to 10), display name with “Anonymous” fallback, correct/attempts, score; highlights first place and the signed-in user’s row (`useUser()`).
 
 ### Other UI
 
@@ -99,9 +106,12 @@ Required for full functionality (document in SETUP_CLERK.md and/or README; never
 | **lib/training-videos.ts**                           | YouTube video list (title, url); edit to add links.                                                                                  |
 | **lib/words/spelling-bee.ts**                        | Word lists per level and timer config; edit word arrays here.                                                                        |
 | **lib/db.ts**                                        | Neon client only; server-side only.                                                                                                  |
-| **lib/actions/spelling-bee.ts**                      | Server Actions for Spelling Bee progress; auth() and parameterized sql.                                                              |
-| **components/SpellingBeeGame.tsx**                   | Client component; level select, timer, optional MP3, saveSpellingBeeProgress.                                                        |
+| **lib/actions/spelling-bee.ts**                      | Server Actions for Spelling Bee progress and weekly leaderboard; auth() on save; getWeeklyLeaderboard(); parameterized sql.          |
+| **components/SpellingBeeGame.tsx**                   | Client component; level select, timer, optional MP3, saveSpellingBeeProgress (+ displayName from useUser).                           |
 | **scripts/migrations/001_spelling_bee_progress.sql** | DDL for spelling_bee_progress; run once in Neon.                                                                                     |
+| **scripts/migrations/002_leaderboard.sql**         | DDL for weekly leaderboard (`spelling_bee_weekly`) + optional display_name on progress; run once in Neon after 001.                  |
+| **app/leaderboard/page.tsx**                         | Protected leaderboard page; auth redirect; loads top weekly rows.                                                                    |
+| **components/Leaderboard.tsx**                       | Client UI for weekly top spellers list.                                                                                              |
 | **docs/AUDIO.md**                                    | Spelling Bee audio: word prompts in `public/sounds/`, per-question (perfect.mp3, failure.mp3), round-end (success.mp3, failure.mp3). |
 
 
@@ -121,7 +131,7 @@ Required for full functionality (document in SETUP_CLERK.md and/or README; never
 - **Word Builder, Letter Match, Sentence Builder:** Removed from the app; only Spelling Bee (game) and Spelling Bee Training Mode (videos) remain.
 - **Progress for other games:** Schema and actions only exist for Spelling Bee; extend pattern if more games are added later.
 - **Day streak / mastery badges:** Progress section shows placeholders; logic not implemented.
-- **Protected routes:** Optional; use auth().protect() or clerkMiddleware() + createRouteMatcher if needed.
+- **Additional route protection:** Beyond `/leaderboard` (gated in the page with `auth()` + `redirect("/auth")`; no middleware changes), optional patterns for other routes include `auth().protect()` or `clerkMiddleware()` + `createRouteMatcher` if needed.
 
 ---
 

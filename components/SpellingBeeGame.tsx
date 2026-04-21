@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { saveSpellingBeeProgress } from "@/lib/actions/spelling-bee";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import {
   type SpellingBeeLevel,
   getWordsForLevel,
@@ -19,6 +20,7 @@ function shuffleInPlace<T>(items: T[]): void {
 }
 
 export default function SpellingBeeGame() {
+  const { user } = useUser();
   const [level, setLevel] = useState<SpellingBeeLevel | null>(null);
   const [words, setWords] = useState<string[]>([]);
   const [secondsPerWord, setSecondsPerWord] = useState<number | null>(null);
@@ -79,6 +81,7 @@ export default function SpellingBeeGame() {
           correct: currentCorrect,
           total: totalSoFar,
           timeSeconds,
+          displayName: user?.firstName ?? user?.username ?? null,
         }).then((result) => {
           setSaving(false);
           if (!result.ok) setSaveError(result.error ?? "Failed to save.");
