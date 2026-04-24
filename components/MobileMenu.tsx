@@ -13,6 +13,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     { href: "#games", label: "Games" },
     { href: "#features", label: "Features" },
     { href: "#progress", label: "Progress" },
+    { href: "/leaderboard", label: "Leaderboard" },
   ];
 
   if (!isOpen) return null;
