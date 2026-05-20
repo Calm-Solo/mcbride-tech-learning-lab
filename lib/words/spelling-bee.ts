@@ -27,13 +27,21 @@ export const ROUND_SIZE: Record<SpellingBeeLevel, number> = {
 // - MEDIUM_WORDS: current longer words (new MP3 set)
 // - HARD_WORDS: reserved for future hardest words (empty for now)
 const EASY_WORDS = ["cat", "dog", "run", "sun", "hat"];
-const MEDIUM_WORDS = ["school", "learn", "computer", "hospital", "education"];
+const MEDIUM_WORDS = [
+  "school",
+  "learn",
+  "computer",
+  "hospital",
+  "education",
+  "diploma",
+];
 const HARD_WORDS = [
   "california",
   "cincinatti",
   "mississippi",
   "pennsylvania",
   "philadelphia",
+  "intelligence",
 ];
 
 const PARENT_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
