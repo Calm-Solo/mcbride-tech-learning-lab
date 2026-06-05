@@ -9,35 +9,35 @@ export type TrainingVideo = {
 
 export const TRAINING_VIDEOS: TrainingVideo[] = [
   {
-    title: "Introduction & How To Spell CAT",
-    url: "https://youtube.com/shorts/DlCZrLgBEhQ?feature=shared",
+    title: "Introduction",
+    url: "https://youtu.be/0UKYrUvuWxE",
   },
   {
-    title: "ROAD TRIP SONG",
-    url: "https://youtube.com/shorts/lZwVfeJnA_Y?feature=shared",
+    title: "Lesson 1",
+    url: "https://youtube.com/shorts/jYsa1zqnl_E",
   },
   {
-    title: "Episode 2",
-    url: "https://youtube.com/shorts/8j2oovq1Olw?si=vZFBYQoxHVmlLXXs",
+    title: "Lesson 2",
+    url: "https://youtube.com/shorts/KZ8Rg5GnuOo",
   },
   {
-    title: "Episode 3",
-    url: "https://youtube.com/shorts/Urm2JE8f3DA?si=ZtwUdiVfNwMsnXP5",
+    title: "Lessson 3",
+    url: "https://youtube.com/shorts/0fePgGWSU_A",
   },
   {
-    title: "Episode 4",
-    url: "https://youtube.com/shorts/sbxpTDuFctM?si=xGHs2vl8d7N8sW5U",
+    title: "Lesson 4",
+    url: "https://youtube.com/shorts/KYDpUVqVxNQ",
   },
   {
-    title: "Episode 5",
-    url: "https://youtu.be/vgKtXlc5P8U?si=gHTrrmbn1uQjc6Ng",
+    title: "Lesson 5",
+    url: "https://youtube.com/shorts/mB12yQsxs4U",
   },
   {
-    title: "Episode 6",
-    url: "https://youtube.com/shorts/xvqkneDcAl8?si=OtuCsFUfce4XuMIU",
+    title: "Lesson 6",
+    url: "https://youtube.com/shorts/sCZqqCKuevM",
   },
   {
-    title: "Episode 7",
-    url: "https://youtube.com/shorts/ad3XARk5dHw?si=562UVm1oo3RYSOKj",
+    title: "Spelling Test",
+    url: "https://youtube.com/shorts/W7XaHSI61Kg",
   },
 ];
