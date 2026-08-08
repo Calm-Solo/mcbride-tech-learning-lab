@@ -8,12 +8,7 @@ import trainingVidsImage from "@/images/training-vids.png";
 import { auth } from "@clerk/nextjs/server";
 import { getSpellingBeeProgress } from "@/lib/actions/spelling-bee";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import InstructionsButton from "@/components/InstructionsButton";
-
-const WelcomeAudio = dynamic(() => import("@/components/WelcomeAudio"), {
-  ssr: false,
-});
 
 function formatTimeSeconds(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
@@ -28,13 +23,12 @@ export default async function Home() {
 
   return (
     <main className="relative min-h-screen text-slate-100">
-      <WelcomeAudio />
       <AnimatedBackground />
       <Header />
 
       {/* Hero Section */}
       <Section id="hero" className="pt-24 pb-16">
-        <div className="text-center max-w-4xl mx-auto">
+        <div className="text-center max-w-6xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-display font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-violet-200 mb-6">
             Make reading feel achievable and fun.
           </h1>
@@ -44,28 +38,22 @@ export default async function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="#signup"
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 px-8 py-4 rounded-lg text-lg font-semibold hover:from-cyan-400 hover:to-blue-400 transition-colors shadow-lg shadow-cyan-500/30"
-            >
-              Start Free
-            </a>
-            <a
               href="#games"
-              className="bg-white/5 text-cyan-200 px-8 py-4 rounded-lg text-lg font-semibold border border-cyan-300/40 hover:bg-white/10 transition-colors"
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 px-8 py-4 rounded-lg text-lg font-semibold hover:from-cyan-400 hover:to-blue-400 transition-colors shadow-lg shadow-cyan-500/30"
             >
               See Games
             </a>
             <InstructionsButton />
           </div>
           <div className="mt-12">
-            <div className="bg-white/5 border border-white/10 backdrop-blur rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 max-w-3xl mx-auto">
+            <div className="bg-white/5 border border-white/10 backdrop-blur rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 max-w-5xl mx-auto">
               <div className="relative aspect-video overflow-hidden rounded-lg">
                 <Image
                   src={heroImage}
                   alt="McBride Tech Learning Lab futuristic learning space"
                   fill
                   priority
-                  sizes="(min-width: 1024px) 768px, (min-width: 640px) 640px, 100vw"
+                  sizes="(min-width: 1024px) 1024px, (min-width: 640px) 768px, 100vw"
                   className="object-cover"
                 />
               </div>

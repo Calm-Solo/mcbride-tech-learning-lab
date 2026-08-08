@@ -2,6 +2,8 @@
 
 This file tracks the scope and current state of the project so AI agents can stay aligned with the codebase and avoid redoing or conflicting work.
 
+**Last reviewed:** August 2026
+
 ---
 
 ## Project purpose
@@ -46,32 +48,56 @@ Word lists, MP3 audio files, and YouTube video links are provided by you and con
 
 ### Home page (app/page.tsx)
 
-- Hero with CTA buttons: **Start Free**, **See Games**, and an **Instructions** button that plays `welcome.mp3` so non-readers can hear spoken guidance.
-- Games section with two large, tappable image tiles (`images/training-vids.png`, `images/play-now.png`) that link to **Spelling Bee Training Mode** (`/training`) and **Spelling Bee Mode** (`/games/spelling-bee`).
+- Hero with CTA buttons: **See Games** (primary gradient style) and an **Instructions** button (`components/InstructionsButton.tsx`) that plays `welcome.mp3` on demand. No autoplay on page load.
+- Hero image (`images/mtll-hero.png`) in a larger container (`max-w-5xl` within `max-w-6xl` section).
+- Games section with two large, tappable image tiles (`images/training-vids.png`, `images/play-now.png`) that link to **Spelling Bee Training Mode** (`/training`) and **Spelling Bee Mode** (`/games/spelling-bee`). Minimal text (“Tap a picture to start.”).
 - **Progress section:** If signed in, shows real Spelling Bee stats from Neon (accuracy, day streak placeholder, time spent, rounds played). If signed out, shows “Sign in to track your progress” and placeholders.
+- Hero, features, progress, and footer sections still contain substantial on-screen text (see Future scope).
 
 ### Spelling Bee Training Mode (YouTube)
 
-- **app/training/page.tsx** – Lists YouTube videos from **lib/training-videos.ts** (title + link; opens in new tab). No DB tracking. Add or edit entries in that file.
+- **app/training/page.tsx** – Lists YouTube videos from **lib/training-videos.ts** (title + link; opens in new tab). Glowing **Instructions** button plays `training.mp3` on click (no autoplay). No DB tracking.
+- **lib/training-videos.ts** – Currently 8 entries: Introduction, Lesson 1–6, Spelling Test. Add or edit entries in that file as new videos are created.
 
 ### Spelling Bee game
 
 - **app/games/spelling-bee/page.tsx** – Game page with Header and Section.
-- **components/SpellingBeeGame.tsx** – Client component: level selection (Easy, Medium, Hard, Parent Mode), then per-level word list and per-word timer (Parent Mode = no timer). Word is not displayed—player hears prompt from `public/sounds/{word}.mp3` and “Play again” replays it. Bold, urgent timer (color + pulse when low). Per-question feedback: `perfect.mp3` (correct) and `failure.mp3` (wrong or timeout); advance happens only after the sound ends. Round end: `success.mp3` or `failure.mp3`. Saves via `saveSpellingBeeProgress` with optional `displayName` from Clerk `useUser()` (`firstName` or `username`); “Round complete” with links to play again / view progress. The game logic has been refactored to avoid stale state and double-advance bugs (see `debug.md` for details).
+- **components/SpellingBeeGame.tsx** – Client component: level selection (Easy, Medium, Hard, Parent Mode), shuffled word pool, then a random subset per round (`ROUND_SIZE`: 5 for Easy/Medium/Hard, 10 for Parent). Per-level timer (Parent Mode = no timer). Word is not displayed—player hears prompt from `public/sounds/{word}.mp3` and “Play again” replays it. Bold, urgent timer (color + pulse when low). Per-question feedback: `perfect.mp3` (correct), `incorrect.mp3` (wrong answer), `failure.mp3` (timeout); advance happens only after the sound ends. Round end: `success.mp3` or `failure.mp3`. Saves via `saveSpellingBeeProgress` with optional `displayName` from Clerk `useUser()` (`firstName` or `username`); “Round complete” with links to play again / view progress. Game logic uses refs and guard flags to avoid stale state and double-advance bugs (fixes applied in the current component).
 - **lib/words/spelling-bee.ts** – Word lists per level (`WORDS_BY_LEVEL`) and level config (seconds per word; Parent = no timer). Uses a **separated tier** model:
-  - Easy: `EASY_WORDS` – short 3-letter starter words (e.g. `cat`, `dog`, `run`, `sun`, `hat`), 30s/word.
-  - Medium: `MEDIUM_WORDS` – current longer words with MP3s (`school`, `learn`, `computer`, `hospital`, `education`), 20s/word.
-  - Hard: `HARD_WORDS` – reserved for the most difficult future words (currently empty), 12s/word.
-  - Parent Mode: `PARENT_WORDS` – union of Easy + Medium + Hard with no timer.
+
+| Level | Word array | Timer | Current words |
+| ----- | ---------- | ----- | ------------- |
+| Easy | `EASY_WORDS` | 30s / word | cat, dog, run, sun, hat (5) |
+| Medium | `MEDIUM_WORDS` | 20s / word | school, learn, computer, hospital, education, diploma (6) |
+| Hard | `HARD_WORDS` | 12s / word | california, cincinatti, mississippi, pennsylvania, philadelphia, intelligence (6) |
+| Parent Mode | `PARENT_WORDS` = Easy + Medium + Hard | No timer | All 17 words |
+
+`PARENT_WORDS` is `[...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS]` so new tier words are included automatically.
+
+### Audio assets (`public/sounds/`)
+
+**Word prompts (in word lists):** cat, dog, run, sun, hat, school, learn, computer, hospital, education, diploma, california, cincinatti, mississippi, pennsylvania, philadelphia, intelligence.
+
+**Feedback / helper (not word prompts):** perfect.mp3, incorrect.mp3, failure.mp3, success.mp3, welcome.mp3, training.mp3.
+
+**MP3 on disk but not yet in a word list:** dendrites.mp3 — add `"dendrites"` to the appropriate tier in `lib/words/spelling-bee.ts` when ready.
 
 ### Weekly leaderboard (Spelling Bee)
 
-- **app/leaderboard/page.tsx** – Async Server Component: `auth()` from `@clerk/nextjs/server`; redirects signed-out users to `/auth`. Loads rows via `getWeeklyLeaderboard()` and passes them to `Leaderboard`. Subtitle shows the current week’s Monday–Sunday range in Pacific time; the week start is read from Neon with the same `DATE_TRUNC` / `America/Los_Angeles` expression as the leaderboard query so UI and DB stay aligned.
+- **app/leaderboard/page.tsx** – Async Server Component: `auth()` from `@clerk/nextjs/server`; redirects signed-out users to `/auth`. Navigation is the shared **Header** only (no extra back link — the menu bar is sufficient). Loads rows via `getWeeklyLeaderboard()` and passes them to `Leaderboard`. Subtitle shows the current week’s Monday–Sunday range in Pacific time; the week start is read from Neon with the same `DATE_TRUNC` / `America/Los_Angeles` expression as the leaderboard query so UI and DB stay aligned.
 - **components/Leaderboard.tsx** – Client component: ranked list (up to 10), display name with “Anonymous” fallback, correct/attempts, score; highlights first place and the signed-in user’s row (`useUser()`).
+
+### Store (merch)
+
+- **app/store/page.tsx** – Public Server Component (no auth gate) at `/store`; glowing gradient “Store” heading, “Tap a shirt to see it up close.” hint, and a “More merch coming soon!” note. No prices, cart, or checkout yet.
+- **components/MerchViewer.tsx** – Client component: renders each shirt's front and back as buttons; tapping one opens a full-screen close-up with a large labelled **Close** button. Backdrop click and Escape also close it, and page scroll is locked while open.
+- **lib/merch.ts** – `MERCH_ITEMS` catalog (`MerchItem`: id, name, front, back) using static imports from `images/`: Light Pink (`front-light-pink.png` / `back-light-pink.png`), Lime (`front-lime.png` / `back-lime.png`), Black (`front-black.png` / `black-back.png`). Note the black back file is named `black-back.png`, not `back-black.png`.
+- Reachable from **Store** in both `Header` and `MobileMenu` nav.
 
 ### Other UI
 
 - **components/AuthPanel.tsx** – Clerk-aware (SignedIn/SignedOut, UserButton). Used where a short auth prompt is needed.
+- **components/InstructionsButton.tsx** – On-demand spoken guidance for non-readers (`src` defaults to `welcome.mp3`; optional `glow` for training page / `training.mp3`). No page-load autoplay.
 - **components/AnimatedBackground.tsx**, **Section.tsx** – Layout and styling.
 - Hero image: **images/mtll-hero.png**.
 
@@ -81,7 +107,6 @@ Word lists, MP3 audio files, and YouTube video links are provided by you and con
 
 Required for full functionality (document in SETUP_CLERK.md and/or README; never commit values):
 
-
 | Variable                            | Purpose                                                                                        |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk frontend (pk_test_ or pk_live_)                                                          |
@@ -89,31 +114,33 @@ Required for full functionality (document in SETUP_CLERK.md and/or README; never
 | `CLERK_ENCRYPTION_KEY`              | Required when passing secretKey to clerkMiddleware(); 32-byte hex, e.g. `openssl rand -hex 32` |
 | `DATABASE_URL`                      | Neon Postgres connection string (postgresql://...?sslmode=require)                             |
 
-
 ---
 
 ## Key files (for agents)
-
 
 | Path                                                 | Role                                                                                                                                 |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | **middleware.ts**                                    | Clerk auth; do not add Supabase or other auth here.                                                                                  |
 | **app/layout.tsx**                                   | ClerkProvider, fonts, metadata.                                                                                                      |
-| **app/page.tsx**                                     | Home; async server component; auth() + getSpellingBeeProgress; Progress section and Spelling Bee link.                               |
+| **app/page.tsx**                                     | Home; async server component; auth() + getSpellingBeeProgress; image-based games entry; on-demand Instructions.                     |
 | **app/auth/page.tsx**                                | Clerk SignIn/SignUp tabs; redirect when signed in.                                                                                   |
 | **app/games/spelling-bee/page.tsx**                  | Spelling Bee game wrapper.                                                                                                           |
-| **app/training/page.tsx**                            | Spelling Bee Training Mode; lists videos from lib/training-videos.ts.                                                                |
+| **app/training/page.tsx**                            | Spelling Bee Training Mode; lists videos from lib/training-videos.ts; glowing Instructions (training.mp3).                           |
 | **lib/training-videos.ts**                           | YouTube video list (title, url); edit to add links.                                                                                  |
-| **lib/words/spelling-bee.ts**                        | Word lists per level and timer config; edit word arrays here.                                                                        |
+| **lib/words/spelling-bee.ts**                        | Word lists per level, ROUND_SIZE, and timer config; edit word arrays here.                                                           |
 | **lib/db.ts**                                        | Neon client only; server-side only.                                                                                                  |
 | **lib/actions/spelling-bee.ts**                      | Server Actions for Spelling Bee progress and weekly leaderboard; auth() on save; getWeeklyLeaderboard(); parameterized sql.          |
-| **components/SpellingBeeGame.tsx**                   | Client component; level select, timer, optional MP3, saveSpellingBeeProgress (+ displayName from useUser).                           |
+| **components/SpellingBeeGame.tsx**                   | Client component; level select, shuffle + subset rounds, timer, MP3 prompts/feedback, saveSpellingBeeProgress (+ displayName).     |
+| **components/InstructionsButton.tsx**                | On-demand helper audio (`src`, optional `glow`); home uses welcome.mp3, training uses training.mp3.                                  |
 | **scripts/migrations/001_spelling_bee_progress.sql** | DDL for spelling_bee_progress; run once in Neon.                                                                                     |
-| **scripts/migrations/002_leaderboard.sql**         | DDL for weekly leaderboard (`spelling_bee_weekly`) + optional display_name on progress; run once in Neon after 001.                  |
-| **app/leaderboard/page.tsx**                         | Protected leaderboard page; auth redirect; loads top weekly rows.                                                                    |
+| **scripts/migrations/002_leaderboard.sql**           | DDL for weekly leaderboard (`spelling_bee_weekly`) + optional display_name on progress; run once in Neon after 001.                  |
+| **app/leaderboard/page.tsx**                         | Protected leaderboard page; Header only for nav; auth redirect; loads top weekly rows.                                               |
 | **components/Leaderboard.tsx**                       | Client UI for weekly top spellers list.                                                                                              |
-| **docs/AUDIO.md**                                    | Spelling Bee audio: word prompts in `public/sounds/`, per-question (perfect.mp3, failure.mp3), round-end (success.mp3, failure.mp3). |
-
+| **app/store/page.tsx**                               | Public merch page; glowing heading; renders MerchViewer; no checkout yet.                                                             |
+| **components/MerchViewer.tsx**                       | Client component; front/back shirt buttons plus close-up overlay with Close button, backdrop click, and Escape.                       |
+| **lib/merch.ts**                                     | MERCH_ITEMS catalog with static image imports; replace with Printify data when the API is wired.                                     |
+| **docs/AUDIO.md**                                    | Spelling Bee audio: word prompts, feedback sounds, on-demand welcome/training helper audio.                                          |
+| **debug.md**                                         | Current UX task notes from the owner (not historical SpellingBeeGame bug write-ups).                                                 |
 
 ---
 
@@ -122,15 +149,37 @@ Required for full functionality (document in SETUP_CLERK.md and/or README; never
 - **Supabase** – Removed (auth and DB). Auth is Clerk; DB is Neon.
 - **Email/password auth** – Not used; Clerk handles sign-in/sign-up (e.g. Google OAuth, Clerk-hosted UI).
 - **Local-only auth** – Not used; rely on Clerk (and optionally OAuth).
+- **Word Builder, Letter Match, Sentence Builder** – Removed from the app; only Spelling Bee (game) and Spelling Bee Training Mode (videos) remain.
+
+---
+
+## Completed work (recent)
+
+- **SpellingBeeGame stability** – Ref-based advancement, `advancingRef` guard, single `advanceQuestion` / `playThenAdvance` path (applied in component).
+- **Separated difficulty tiers** – Easy / Medium / Hard use distinct word pools; Parent Mode uses the union. Difficulty scales by word length/complexity and shorter timers on higher tiers.
+- **Medium tier MP3s** – school, learn, computer, hospital, education wired and live.
+- **Hard tier MP3s** – california, cincinatti, mississippi, pennsylvania, philadelphia wired and live.
+- **New words (May 2026)** – diploma (Medium), intelligence (Hard); MP3s in `public/sounds/`.
+- **Non-reader audio (on-demand)** – `welcome.mp3` via homepage Instructions; `training.mp3` via glowing Instructions on `/training`. Page-load autoplay removed (WelcomeAudio / TrainingIntroAudio deleted) to prevent overlapping sounds.
+- **Homepage hero UX** – Removed non-functional Start Free; See Games is primary CTA; larger hero image.
+- **Leaderboard navigation** – Shared Header provides the way out of `/leaderboard`; the extra Back to home link was removed as redundant.
+- **Homepage games UX** – `play-now.png` and `training-vids.png` as primary tappable entry points with minimal text.
+- **Training videos** – 8 YouTube links in lib/training-videos.ts.
+- **Store page (view-only)** – `/store` with pink, lime, and black shirts (front and back), linked from Header and MobileMenu.
 
 ---
 
 ## Future scope (not yet implemented)
 
 - **Clerk production:** Switch to production keys and add production domain in Clerk Dashboard when going live.
-- **Word Builder, Letter Match, Sentence Builder:** Removed from the app; only Spelling Bee (game) and Spelling Bee Training Mode (videos) remain.
+- **More words and videos:** Owner will add MP3s to `public/sounds/` and entries to word lists / training-videos.ts over time. Wire orphan files (e.g. dendrites.mp3) when ready.
+- **Homepage simplification for non-readers:** Games section is image-first; hero, features, progress, and footer still have a lot of text. Goal is to reduce further so pre-readers can focus on training and playing.
 - **Progress for other games:** Schema and actions only exist for Spelling Bee; extend pattern if more games are added later.
-- **Day streak / mastery badges:** Progress section shows placeholders; logic not implemented.
+- **Day streak / mastery badges:** Progress section shows hardcoded placeholder `7` for day streak. Real streak logic requires storing `last_played_at` per day in Neon and computing consecutive days in `getSpellingBeeProgress`.
+- **Per-word extra seconds:** Optional `perWordExtraSeconds: Record<string, number>` on level config for very long words (e.g. +5s for encyclopedia). Not implemented.
+- **Audio validation script:** Node script to cross-check `WORDS_BY_LEVEL` against `public/sounds/` and report missing MP3s; useful as a pre-deploy check as word lists grow.
+- **Printify product sync:** `/store` currently renders the hardcoded `MERCH_ITEMS` in `lib/merch.ts`. Replace with Printify product data (personal access token → `PRINTIFY_API_TOKEN`, server-side only) once the shop is set up. See https://developers.printify.com/#create-a-personal-access-token.
+- **Store checkout (Stripe):** No prices, cart, or payment flow yet. Blocked on the owner's Mercury bank and Stripe setup; add product prices, variants/sizes, and checkout after that is complete.
 - **Additional route protection:** Beyond `/leaderboard` (gated in the page with `auth()` + `redirect("/auth")`; no middleware changes), optional patterns for other routes include `auth().protect()` or `clerkMiddleware()` + `createRouteMatcher` if needed.
 
 ---
@@ -138,108 +187,21 @@ Required for full functionality (document in SETUP_CLERK.md and/or README; never
 ## Conventions for agents
 
 1. **DB access:** Only in Server Components, Route Handlers, or Server Actions. Never import `lib/db` or Neon in Client Components.
-2. **Queries:** Use parameterized queries (e.g. `sql\`... WHERE id = ${id}`). No string concatenation of user input into SQL.
+2. **Queries:** Use parameterized queries (e.g. `` sql`... WHERE id = ${id}` ``). No string concatenation of user input into SQL.
 3. **Secrets:** Never commit real keys; document env vars in SETUP_CLERK.md or README with placeholders.
 4. **Clerk:** Use `clerkMiddleware()` (not `authMiddleware()`). Imports from `@clerk/nextjs` or `@clerk/nextjs/server`.
 5. **Neon:** Use the shared `sql` from `lib/db.ts`; validate DATABASE_URL format in that file only.
+6. **Adding a spelling word:** (1) Add `{word}.mp3` to `public/sounds/`, (2) add the lowercase word string to the correct array in `lib/words/spelling-bee.ts`. Parent Mode picks it up automatically via `PARENT_WORDS`.
+7. **SpellingBeeGame.tsx** is a Client Component (`'use client'`). Keep all server logic in `lib/actions/spelling-bee.ts`.
 
-## Debug
+---
 
-1. Bug Fixes — SpellingBeeGame.tsx
+## Word-list design notes (for agents)
 
-Three compounding bugs caused the game to break on question 4 of 5. All three are fixed in the replacement file. Apply this file in full; do not patch incrementally.
+**Why separated tiers (not cumulative Easy ⊂ Medium ⊂ Hard):**
 
-Bug 1 — Stale correctCount in handleSubmit
-Root cause
-newCorrect was computed from the correctCount React state variable inside an async audio callback (advance()). By question 4, prior async callbacks may not have resolved yet, so correctCount reads an outdated value and the score is wrong.
-Fix
-Read from correctCountRef.current (a ref that mirrors state) inside all async callbacks. Refs are always current regardless of closure timing.
-File / line
-components/SpellingBeeGame.tsx — handleSubmit function
+- Cumulative rounds mix 3-letter words with multi-syllable words, creating jarring difficulty spikes within a single round for child learners.
+- Parent Mode already provides the cumulative full-vocabulary experience.
+- Each level has consistent difficulty that matches its timer setting.
 
-Bug 2 — No guard against double-advance
-Root cause
-Both the timeout handler (timeLeft === 0 effect) and handleSubmit could call advance() on the same question simultaneously — for example if the user submits at the exact moment the timer hits 0. This caused duplicate state updates and unpredictable skips.
-Fix
-Added a single advancingRef boolean flag. The first path to call advanceQuestion() sets it to true; all subsequent calls for the same question are no-ops. The flag is reset for the next question inside advanceQuestion (non-last words) and by startRound / resetToLevelSelect at round boundaries.
-File / line
-components/SpellingBeeGame.tsx — advancingRef, advanceQuestion()
-
-Bug 3 — Duplicate advance logic with inconsistent state access
-Root cause
-The original component had two separate inline advance() closures: one inside the timeout useEffect and one inside handleSubmit. Each captured different combinations of stale state (isLast, index, correctCount, startTime), making them diverge by question 4.
-Fix
-Consolidated all advancement into a single advanceQuestion(overrideCorrect?) function backed entirely by refs (indexRef, wordsRef, startTimeRef, correctCountRef). A playThenAdvance(src, correct) helper wraps audio playback and calls advanceQuestion on ended/error. Both the timeout path and the submit path call playThenAdvance, so they always share the same logic and the same ref-based values.
-File / line
-components/SpellingBeeGame.tsx — advanceQuestion(), playThenAdvance()
-
-Action required
-Replace components/SpellingBeeGame.tsx with the fixed file. No other files need to change for this fix.
-•	Do NOT partially merge — the fix is a full replacement of the component
-•	The public API (props, exports) is unchanged; no callers need updating
-•	The UI and all styling are pixel-identical to the original
-
-1. Word-List Architecture — lib/words/spelling-bee.ts
-
-The word list has been refactored to support separated difficulty tiers. This is a non-breaking change to the same file; the exported function signatures (getWordsForLevel, getSecondsPerWord, LEVEL_CONFIG, WORDS_BY_LEVEL) are identical.
-
-Difficulty model — separated tiers
-Level	Word array	Timer	Example words
-Easy	EASY_WORDS only	30s / word	cat, dog, run, sun, hat
-Medium	MEDIUM_WORDS only	20s / word	school, learn, computer, hospital, education
-Hard	HARD_WORDS only	12s / word	(empty — add when MP3s are ready)
-Parent Mode	EASY + MEDIUM + HARD	No timer	Full vocabulary
-
-Why separated (not cumulative)
-The original plan proposed cumulative tiers (Easy ⊂ Medium ⊂ Hard). Separated tiers were chosen instead because:
-•	Cumulative rounds mix 3-letter words with multi-syllable words, creating jarring difficulty spikes within a single round for child learners
-•	Parent Mode already provides the cumulative full-vocabulary experience
-•	Each level now has a consistent, predictable difficulty that matches its timer setting
-
-PARENT_WORDS stays in sync automatically
-PARENT_WORDS is defined as [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS]. Any word added to any tier array is automatically included in Parent Mode with no additional changes required.
-
-Action required before deploying
-•	Ensure these MP3 files exist in public/sounds/ before enabling Medium:
-◦	school.mp3
-◦	learn.mp3
-◦	computer.mp3
-◦	hospital.mp3
-◦	education.mp3
-•	HARD_WORDS is intentionally empty. Add words and matching MP3s to expand Hard mode over time.
-•	Replace lib/words/spelling-bee.ts with the new file. Exported function signatures are unchanged.
-
-1. Future Scope (documented, not implemented)
-
-Per-word extra seconds
-If very long words need extra timer time (e.g. +5s for 'encyclopedia'), add an optional perWordExtraSeconds: Record<string, number> map to LEVEL_CONFIG and apply it in SpellingBeeGame.tsx. Not implemented yet; document in a comment when ready.
-
-Round length
-Currently all levels play the full word array each round (5 words). As word sets grow past ~10 words, consider randomizing a subset per round or adding a configurable WORDS_PER_ROUND constant to LEVEL_CONFIG. Easy to add without changing the component's public API.
-
-Audio validation script
-A Node.js script that cross-checks every word in WORDS_BY_LEVEL against files in public/sounds/ and reports any missing MP3s. Recommended to run as a pre-deploy check once Hard words are being added regularly.
-
-Day streak / mastery badges
-Progress section on the home page shows a hardcoded placeholder of 7 for day streak. Real streak logic requires storing last_played_at per day in Neon and computing the consecutive-day count in getSpellingBeeProgress. Not implemented; extend the server action and home page progress section when ready.
-
-1. Recommended Deployment Order
-
-Deploy in this order to avoid user-facing breakage:
-
-Step	Action	Notes
-1	Deploy SpellingBeeGame.tsx fix	Fixes the question-4 bug immediately. No word list or audio changes needed.
-2	Add 5 Medium MP3s to public/sounds/	school, learn, computer, hospital, education. Required before step 3.
-3	Deploy spelling-bee.ts update	Activates Medium tier. Verify each mode plays correct words and audio in staging first.
-4	Smoke-test all 4 modes on live site	Easy (3-letter only), Medium (medium words only), Hard (empty = 0 words, handle gracefully), Parent (all words).
-5	Add Hard words + MP3s over time	Append to HARD_WORDS array; no other changes needed.
-
-1. Agent Conventions Reminder
-
-These apply to all future work on this codebase per progress.md:
-•	DB access only in Server Components, Route Handlers, or Server Actions. Never import lib/db in Client Components.
-•	All SQL queries must use parameterized form (sql`... WHERE id = ${id}`). No string concatenation of user input.
-•	Auth is Clerk only. Use clerkMiddleware() (not authMiddleware()). Imports from @clerk/nextjs or @clerk/nextjs/server.
-•	Neon: use the shared sql export from lib/db.ts only. DATABASE_URL is validated there.
-•	Never commit real keys. Document env vars with placeholders in SETUP_CLERK.md or README.
-•	SpellingBeeGame.tsx is a Client Component ('use client'). Keep all server logic in lib/actions/spelling-bee.ts.
+**Round sampling:** Each round shuffles the level’s pool and takes `ROUND_SIZE[level]` words (capped by pool length). As lists grow past ~10 words, subset sampling keeps rounds short without code changes beyond `ROUND_SIZE`.
