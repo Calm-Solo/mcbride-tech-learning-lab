@@ -24,7 +24,8 @@ The game looks up `/sounds/{word}.mp3` for the current word. If the file is miss
 ## Per-question feedback (optional)
 
 - **perfect.mp3** – Played when the player spells a word correctly (before moving to the next question).
-- **failure.mp3** – Played when the answer is wrong or when time runs out (before moving on).
+- **incorrect.mp3** – Played when the player submits a wrong answer (before moving on).
+- **failure.mp3** – Played when time runs out on a timed question (before moving on).
 
 Place in `public/sounds/`. If a file is missing, playback is skipped.
 
@@ -33,7 +34,7 @@ Place in `public/sounds/`. If a file is missing, playback is skipped.
 Add these to `public/sounds/` for feedback when a round finishes:
 
 - **success.mp3** – Played when the player gets at least half the words correct.
-- **failure.mp3** – Played when the player gets fewer than half correct (same file as per-question wrong).
+- **failure.mp3** – Played when the player gets fewer than half correct.
 
 If either file is missing, the game still works; playback is skipped.
 
@@ -43,9 +44,9 @@ Word lists are defined in **lib/words/spelling-bee.ts** per level (easy, medium,
 
 ## Non-word helper audio
 
-These special files provide spoken guidance for players who cannot yet read the on-screen text:
+These special files provide spoken guidance for players who cannot yet read the on-screen text. They play **only when the player taps Instructions** (no page-load autoplay):
 
-- **welcome.mp3** – Plays once when the homepage first loads in a browser tab, to welcome the player and briefly explain what the app does.
-- **training.mp3** – Plays when the Spelling Bee Training Mode page loads, giving brief instructions on how to watch the training videos.
+- **welcome.mp3** – Homepage Instructions button (`components/InstructionsButton.tsx`, default `src`).
+- **training.mp3** – Training page Instructions button (`src="/sounds/training.mp3"`, with `glow`).
 
-Both files live in `public/sounds/`. If playback is blocked by browser autoplay rules, the app continues to work normally.
+Both files live in `public/sounds/`. If playback fails, the app continues to work normally.

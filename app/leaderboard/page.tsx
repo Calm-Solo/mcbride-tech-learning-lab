@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Header from "@/components/Header";
 import Leaderboard from "@/components/Leaderboard";
 import { getWeeklyLeaderboard } from "@/lib/actions/spelling-bee";
 import { sql } from "@/lib/db";
@@ -63,6 +64,7 @@ export default async function LeaderboardPage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200">
+      <Header />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-display font-bold text-white">

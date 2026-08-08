@@ -2,26 +2,18 @@ import Header from "@/components/Header";
 import Section from "@/components/Section";
 import Link from "next/link";
 import { TRAINING_VIDEOS } from "@/lib/training-videos";
-import dynamic from "next/dynamic";
-
-const TrainingIntroAudio = dynamic(
-  () => import("@/components/TrainingIntroAudio"),
-  { ssr: false },
-);
+import InstructionsButton from "@/components/InstructionsButton";
 
 export default function TrainingPage() {
   return (
     <main className="relative min-h-screen text-slate-100">
       <Header />
-      <TrainingIntroAudio />
       <Section className="pt-24 pb-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-display font-semibold text-white mb-2">
+          <h1 className="text-4xl font-display font-semibold text-white mb-6">
             Spelling Bee Training Mode
           </h1>
-          <p className="text-slate-300 max-w-2xl mx-auto">
-            Watch M.T-5 teach how to spell in these videos, then open the McBride Tech Learning Lab app and test what you retained in Spelling Bee Mode.
-          </p>
+          <InstructionsButton src="/sounds/training.mp3" glow />
         </div>
         <div className="max-w-2xl mx-auto space-y-4">
           {TRAINING_VIDEOS.length === 0 ? (
